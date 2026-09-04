@@ -1,0 +1,55 @@
+{% extends 'ventas/base.html' %}
+{% block content %}
+<h2>Registrar Venta</h2>
+<form method="POST">
+    {% csrf_token %}
+    <h3>Datos del Cliente</h3>
+    <label>RUT Cliente:</label><br>
+    <input type="text" name="rut" required><br><br>
+    
+    <label>¿Es cliente habitual? (Guardar datos)</label>
+    <input type="checkbox" name="es_habitual" id="es_habitual" onchange="toggleNombre()"><br><br>
+    
+    <div id="nombre_div" style="display:none;">
+        <label>Nombre del Cliente:</label><br>
+        <input type="text" name="nombre" id="nombre"><br><br>
+    </div>
+
+    <h3>Productos</h3>
+    <table>
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Stock Disp.</th>
+            <th>Cantidad a Comprar</th>
+        </tr>
+        {% for p in productos %}
+        <tr>
+            <td>
+                <input type="hidden" name="productos" value="{{ p.id }}">
+                {{ p.nombre }}
+            </td>
+            <td>${{ p.precio }}</td>
+            <td>{{ p.cantidad }}</td>
+            <td>
+                <input type="number" name="cantidades" min="0" max="{{ p.cantidad }}" value="0">
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <button type="submit" class="btn">Confirmar Venta</button>
+</form>
+
+<script>
+function toggleNombre() {
+    var cb = document.getElementById("es_habitual");
+    var div = document.getElementById("nombre_div");
+    if (cb.checked) {
+        div.style.display = "block";
+    } else {
+        div.style.display = "none";
+    }
+}
+</script>
+{% endblock %}

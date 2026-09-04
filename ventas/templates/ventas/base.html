@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sistema de Ventas</title>
+<style>
+body { font-family: sans-serif; margin: 20px; }
+nav { margin-bottom: 20px; }
+nav a { margin-right: 15px; text-decoration: none; color: blue; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+.btn { padding: 5px 10px; background: #eee; text-decoration: none; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+<nav>
+<a href='{% url "lista_productos" %}'>Productos</a>
+<a href='{% url "registrar_venta" %}'>Registrar Venta</a>
+</nav>
+<hr>
+{% block content %}{% endblock %}
+</body>
+</html>
