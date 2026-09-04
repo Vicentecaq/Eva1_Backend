@@ -1,10 +1,21 @@
 {% extends 'ventas/base.html' %}
 {% block content %}
-<h2>Eliminar Producto</h2>
-<p>¿Estás seguro que deseas eliminar el producto <strong>{{ producto.nombre }}</strong>?</p>
-<form method="POST">
-    {% csrf_token %}
-    <button type="submit" class="btn" style="color:red;">Sí, Eliminar</button>
-    <a href="{% url 'lista_productos' %}" class="btn">Cancelar</a>
-</form>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="alert alert-danger shadow-sm">
+            <h2 class="alert-heading mb-4">⚠️ Eliminar Producto</h2>
+            <p class="fs-5">¿Estás seguro que deseas eliminar permanentemente el producto <br>
+            <strong>"{{ producto.nombre }}"</strong> (Código: {{ producto.codigo }})?</p>
+            <p class="text-muted small">Esta acción no se puede deshacer.</p>
+            
+            <form method="POST" class="mt-4">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger px-4">Sí, Eliminar</button>
+                    <a href="{% url 'lista_productos' %}" class="btn btn-secondary px-4">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

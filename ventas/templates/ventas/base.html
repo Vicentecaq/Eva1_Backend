@@ -1,22 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<title>Sistema de Ventas</title>
-<style>
-body { font-family: sans-serif; margin: 20px; }
-nav { margin-bottom: 20px; }
-nav a { margin-right: 15px; text-decoration: none; color: blue; }
-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-.btn { padding: 5px 10px; background: #eee; text-decoration: none; border: 1px solid #ccc; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ventas - Caso 2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .content-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .table th {
+            background-color: #343a40;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-<nav>
-<a href='{% url "lista_productos" %}'>Productos</a>
-<a href='{% url "registrar_venta" %}'>Registrar Venta</a>
-</nav>
-<hr>
-{% block content %}{% endblock %}
-</body>
-</html>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'lista_productos' %}">🛒 Tienda Caso 2</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'lista_productos' %}">Inventario</a>
