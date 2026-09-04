@@ -17,7 +17,7 @@ class Producto(models.Model):
         return self.nombre
 
 class Venta(models.Model):
-    cliente = models.ForeignKey(Cliente, on_delete=models.SET_NULL, null=True, blank=True)
+    cliente = models.ForeignKey('Cliente', on_delete=models.SET_NULL, null=True, blank=True)
     rut_boleta = models.CharField(max_length=12, blank=True, null=True)
     fecha = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)

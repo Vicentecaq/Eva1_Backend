@@ -29,6 +29,14 @@
                         <span class="input-group-text">$</span>
                         <input type="number" step="0.01" name="precio" class="form-control" value="{{ producto.precio }}" min="0" required>
                     </div>
-                </div>
+                <div class="d-flex justify-content-between">
+                        <a href="{% url 'lista_productos' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">Guardar Producto</button>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
             
