@@ -1,0 +1,154 @@
+{% extends 'ventas/base.html' %}
+
+{% block title %}Historial de Ventas | Sistema de Ventas{% endblock %}
+{% block section_name %}Registro Comercial{% endblock %}
+{% block page_title %}Historial de Ventas Realizadas{% endblock %}
+
+{% block content %}
+<!-- Tarjetas de Resumen Rápido de Ventas -->
+<div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;">
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Recaudación Total</span>
+            <div class="kpi-icon-box icon-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-value">${{ total_recaudado|floatformat:0 }}</div>
+        <div class="kpi-footer">
+            <span class="kpi-badge badge-trend-up">Acumulado</span>
+            <span>Monto histórico facturado</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Transacciones Completadas</span>
+            <div class="kpi-icon-box icon-blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-value">{{ total_transacciones }}</div>
+        <div class="kpi-footer">
+            <span>Boletas de venta generadas</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-label">Acceso Directo</span>
+            <div class="kpi-icon-box icon-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                </svg>
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <a href="{% url 'registrar_venta' %}" class="btn btn-success" style="width: 100%;">
+                + Registrar Nueva Venta (POS)
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Historial de Ventas -->
+<div class="table-card">
+    <div class="table-card-header">
+        <div class="table-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="color: var(--color-primary);">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Libro de Ventas</span>
+            <span class="table-title-count">{{ total_transacciones }} venta{{ total_transacciones|pluralize:"s" }}</span>
+        </div>
+        <span style="font-size: 0.8rem; color: var(--color-text-muted);">Ordenado cronológicamente</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th style="width: 110px;">Boleta #</th>
+                    <th style="width: 170px;">Fecha y Hora</th>
+                    <th>Cliente / Titular</th>
+                    <th style="width: 140px;">Condición</th>
+                    <th style="width: 130px;">Líneas Ítems</th>
+                    <th style="width: 140px;">Total Venta</th>
+                    <th style="width: 130px; text-align: center;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in ventas %}
+                <tr>
+                    <td>
+                        <span class="code-pill">#{{ v.id }}</span>
+                    </td>
+                    <td style="color: var(--color-text-muted); font-size: 0.85rem;">
+                        {{ v.fecha|date:"d/m/Y - H:i" }} hrs
+                    </td>
+                    <td>
+                        {% if v.cliente %}
+                            <div style="font-weight: 600; color: var(--color-text-main);">{{ v.cliente.nombre|default:"Cliente Registrado" }}</div>
+                            <div style="font-size: 0.76rem; color: var(--color-text-muted); font-family: monospace;">RUT: {{ v.cliente.rut }}</div>
+                        {% else %}
+                            <div style="font-weight: 500;">Consumidor Ocasional</div>
+                            <div style="font-size: 0.76rem; color: var(--color-text-muted); font-family: monospace;">RUT: {{ v.rut_boleta|default:"S/RUT" }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if v.cliente %}
+                            <span class="status-badge badge-stock-normal">Cliente Habitual</span>
+                        {% else %}
+                            <span class="status-badge" style="background-color: var(--color-surface-muted); color: var(--color-text-muted);">Ocasional</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--color-text-muted);">
+                        {{ v.detalles.count }} ítem{{ v.detalles.count|pluralize:"s" }}
+                    </td>
+                    <td class="price-cell" style="color: var(--color-success-text); font-size: 1.05rem;">
+                        ${{ v.total|floatformat:0 }}
+                    </td>
+                    <td style="text-align: center;">
+                        <a href="{% url 'detalle_venta' v.id %}" class="btn-sm btn-primary" title="Ver Comprobante">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <span>Ver Boleta</span>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-icon-circle">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <h3 class="empty-title">Aún no hay ventas registradas</h3>
+                            <p class="empty-description">Las ventas que realices a través del terminal POS se listarán aquí con sus comprobantes.</p>
+                            <a href="{% url 'registrar_venta' %}" class="btn btn-success">
+                                Registrar Nueva Venta
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,31 +1,223 @@
 {% extends 'ventas/base.html' %}
+
+{% block title %}Nueva Venta | Terminal POS Comercial{% endblock %}
+{% block section_name %}Punto de Venta{% endblock %}
+{% block page_title %}Registrar Nueva Venta{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-primary">🧾 Registrar Nueva Venta</h2>
-<form method="POST">
-    {% csrf_token %}
-    
-    <div class="card mb-4 shadow-sm border-0">
-        <div class="card-header bg-primary text-white fw-bold">
-            👤 Datos del Cliente
-        </div>
-        <div class="card-body bg-light">
-            <div class="row align-items-center">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label fw-bold">RUT Cliente:</label>
-                    <input type="text" name="rut" class="form-control" placeholder="Ej: 12345678-9" required>
-                </div>
-                
-                <div class="col-md-3 mb-3 d-flex align-items-end h-100 mt-md-4">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="es_habitual" id="es_habitual" onchange="toggleNombre()">
-                        <label class="form-check-label fw-bold" for="es_habitual">¿Guardar como cliente habitual?</label>
+<div id="posTerminalContainer">
+    <form method="POST" id="posSaleForm">
+        {% csrf_token %}
+        <!-- Contenedor dinámico de inputs ocultos que se alimentan del carrito JS -->
+        <div id="posHiddenInputs"></div>
+
+        <div class="pos-layout">
+            <!-- PANEL IZQUIERDO: DATOS DEL CLIENTE Y CHECKOUT -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Tarjeta Datos del Cliente -->
+                <div class="pos-panel">
+                    <div class="pos-panel-header">
+                        <div class="pos-panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color: var(--color-primary);">
+                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Datos del Comprador</span>
+                        </div>
+                    </div>
+                    <div class="pos-panel-body">
+                        <div class="form-group">
+                            <label class="form-label" for="rut">RUT del Cliente / Boleta:</label>
+                            <div class="input-with-icon">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                                </svg>
+                                <input type="text" name="rut" id="rut" class="form-input" placeholder="Ej: 12.345.678-9 o S/RUT" required>
+                            </div>
+                            <div class="form-helper">Se imprimirá en la boleta electrónica.</div>
+                        </div>
+
+                        <!-- Switch de Cliente Habitual -->
+                        <div class="form-group" style="margin-top: 18px; margin-bottom: 18px;">
+                            <label class="switch-container">
+                                <input type="checkbox" name="es_habitual" id="es_habitual" class="switch-input">
+                                <div class="switch-track">
+                                    <div class="switch-thumb"></div>
+                                </div>
+                                <span class="switch-label">¿Registrar como Cliente Habitual?</span>
+                            </label>
+                        </div>
+
+                        <!-- Campo Nombre (revelado condicionalmente) -->
+                        <div class="form-group" id="nombre_div" style="display: none; animation: slideDown 0.25s ease;">
+                            <label class="form-label" for="nombre">Nombre Completo del Cliente:</label>
+                            <div class="input-with-icon">
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <input type="text" name="nombre" id="nombre" class="form-input" placeholder="Ej: Juan Pérez González">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-5 mb-3" id="nombre_div" style="display:none;">
-                    <label class="form-label fw-bold">Nombre del Cliente:</label>
-                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Nombre completo">
+
+                <!-- Tarjeta de Resumen y Total -->
+                <div class="pos-panel">
+                    <div class="pos-panel-header">
+                        <div class="pos-panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color: var(--color-success);">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                                <line x1="12" y1="6" x2="12" y2="8"></line>
+                                <line x1="12" y1="16" x2="12" y2="18"></line>
+                            </svg>
+                            <span>Liquidación de Venta</span>
+                        </div>
+                    </div>
+                    <div class="pos-panel-body">
+                        <div class="pos-total-box">
+                            <div class="pos-total-row">
+                                <span>Artículos en carrito:</span>
+                                <strong id="posItemCount" style="color: #ffffff;">0 unidades</strong>
+                            </div>
+                            <div class="pos-total-row">
+                                <span>Subtotal neto:</span>
+                                <span id="posSubtotal" style="font-weight: 600; color: #ffffff;">$ 0</span>
+                            </div>
+                            <div class="pos-total-grand">
+                                <span class="pos-grand-label">TOTAL:</span>
+                                <span class="pos-grand-amount" id="posGrandTotal">$ 0</span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px;">
+                            <button type="submit" class="btn btn-success" style="width: 100%; padding: 13px; font-size: 1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Completar y Generar Boleta</span>
+                            </button>
+                            <a href="{% url 'lista_productos' %}" class="btn btn-outline" style="width: 100%; text-align: center;">
+                                Cancelar y Regresar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO: CATÁLOGO Y CARRITO DE COMPRA -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Carrito de Venta Activo -->
+                <div class="pos-panel">
+                    <div class="pos-panel-header">
+                        <div class="pos-panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color: var(--color-primary);">
+                                <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                            </svg>
+                            <span>Detalle de la Venta (Carrito)</span>
+                        </div>
+                        <span style="font-size: 0.78rem; color: var(--color-text-muted);">Ajusta las cantidades</span>
+                    </div>
+                    <div class="pos-panel-body" style="padding: 12px 18px;">
+                        <!-- Estado vacío del carrito -->
+                        <div id="emptyCartState" class="empty-state" style="padding: 36px 16px;">
+                            <div class="empty-icon-circle" style="width: 50px; height: 50px; margin-bottom: 12px;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                                    <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
+                                    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+                                </svg>
+                            </div>
+                            <div style="font-weight: 700; color: var(--color-text-main);">El carrito de venta está vacío</div>
+                            <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-top: 4px;">
+                                Haz clic en el botón <strong>"+ Agregar"</strong> de los productos disponibles abajo.
+                            </p>
+                        </div>
+
+                        <!-- Tabla interactiva del carrito -->
+                        <div id="cartTableWrapper" style="display: none; overflow-x: auto;">
+                            <table class="pos-cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th style="width: 110px;">Precio</th>
+                                        <th style="width: 140px;">Cantidad</th>
+                                        <th style="width: 110px;">Subtotal</th>
+                                        <th style="width: 50px; text-align: center;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="posCartTableBody">
+                                    <!-- Filas inyectadas por JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Catálogo de Productos Disponibles en Stock -->
+                <div class="pos-panel">
+                    <div class="pos-panel-header">
+                        <div class="pos-panel-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                                <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+                            </svg>
+                            <span>Catálogo de Productos Disponibles</span>
+                        </div>
+                        <span class="table-title-count">{{ productos.count }} en bodega</span>
+                    </div>
+                    <div class="pos-panel-body">
+                        <!-- Buscador rápido de catálogo -->
+                        <div class="pos-catalog-search">
+                            <div class="search-box" style="width: 100%;">
+                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <input type="text" id="posCatalogSearch" class="search-input" placeholder="Filtrar catálogo por nombre o código...">
+                            </div>
+                        </div>
+
+                        <!-- Lista de productos con botón de agregar -->
+                        <div class="pos-products-list">
+                            {% for p in productos %}
+                            <div class="pos-product-item">
+                                <div class="pos-product-info">
+                                    <div class="pos-product-name">{{ p.nombre }}</div>
+                                    <div class="pos-product-meta">
+                                        <span class="code-pill" style="padding: 2px 6px; font-size: 0.72rem;">{{ p.codigo }}</span>
+                                        &bull; Stock disponible: <strong>{{ p.cantidad }}</strong> unid.
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 14px;">
+                                    <span style="font-weight: 700; color: var(--color-text-main); font-variant-numeric: tabular-nums; font-size: 1rem;">
+                                        ${{ p.precio|floatformat:0 }}
+                                    </span>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-primary btn-add-pos-item"
+                                            data-id="{{ p.id }}"
+                                            data-name="{{ p.nombre }}"
+                                            data-code="{{ p.codigo }}"
+                                            data-price="{{ p.precio }}"
+                                            data-stock="{{ p.cantidad }}">
+                                        + Agregar
+                                    </button>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div style="text-align: center; padding: 24px; color: var(--color-text-muted);">
+                                No hay productos disponibles con stock en bodega. 
+                                <a href="{% url 'crear_producto' %}" style="color: var(--color-primary); font-weight: 600;">
+                                    Registrar productos &rarr;
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="card mb-4 shadow-sm border-0">
+    </form>
+</div>
+{% endblock %}
