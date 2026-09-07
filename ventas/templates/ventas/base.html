@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Ventas - Caso 2</title>
+    <title>Sistema de Ventas </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
     <div class="container">
         <a class="navbar-brand" href="{% url 'lista_productos' %}">🛒 Mi Tienda</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -38,13 +38,11 @@
                     <a class="nav-link text-white" href="{% url 'lista_productos' %}">Inventario</a>
                     </nav>
 
-    <!-- AQUÍ SE INYECTA LA TABLA Y EL RESTO DE PÁGINAS -->
     <main class="container my-4">
         {% block content %}
         {% endblock %}
     </main>
 
-    <!-- Bootstrap JS (opcional si usas menús desplegables) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

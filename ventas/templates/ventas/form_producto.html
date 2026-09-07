@@ -2,7 +2,7 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <h2 class="mb-4 text-primary">{% if producto %}✏️ Editar{% else %}➕ Nuevo{% endif %} Producto</h2>
+        <h2 class="mb-4 text-primary">{% if producto %}✏️ Editar{% else %}Agregar Nuevo{% endif %} Producto</h2>
         
         <form method="POST" class="needs-validation">
             {% csrf_token %}
